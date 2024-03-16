@@ -4,10 +4,10 @@
     * 학번 : 202327041
     * 이름 : 조민서
 
-<Version>        
-IDE : Visual Studio 2022
-Compiler :
-Packages
-OpenGL 
+* Version        
+    * IDE : Visual Studio 2022
+    * Compiler :
+    * Packages
+        * OpenGL 
 
 

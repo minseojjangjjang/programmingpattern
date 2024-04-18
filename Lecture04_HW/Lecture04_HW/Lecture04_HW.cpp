@@ -93,8 +93,8 @@ int main() {
     glfwSwapInterval(1);
 
     //구동 루프
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    while (!glfwWindowShouldClose(window)) {//윈도우가 닫혓는지 여부를 확인하는 함수 윈도우가 닫혓다면 true를 반환
+        glfwPollEvents();//각 반복마다 이 함수가 호출되어 이벤트를 처리함 (마우스 입력, 키 입력, 윈도우 크기 변경 등)
 
         if (IsRightBtnDown) // 오른쪽 마우스를 누르면
         {

@@ -6,8 +6,8 @@
 #include "MSList.h"
 #include "ObjectTest.h"
 
-// 학번 : 202127064
-// 이름 : 이지호
+// 학번 : 202327041
+// 이름 : 조민서
 
 void errorCallback(int error, const char* description)
 {
@@ -30,7 +30,7 @@ int initialize()
 	for (int i = 0; i < 300; i++) {
 		tem[i] = new Star();
 		list.add(tem[i]);
-		std::cout << "우왕 별이다!: " << list.get_size() << std::endl;
+		std::cout << "우와 별이다!: " << list.get_size() << std::endl;
 		
 	}
 	return 0;
@@ -40,7 +40,7 @@ int release()
 {
 	for (int i = 0; i < list.get_size(); ++i) {
 		delete list[i];
-		std::cout << "별이 사라졌ㄷr...: " << i + 1 << std::endl;
+		std::cout << "별이 사라졌다: " << i + 1 << std::endl;
 	}
 	list.clear();
 	return 0;

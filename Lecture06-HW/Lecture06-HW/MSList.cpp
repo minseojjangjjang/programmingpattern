@@ -1,7 +1,6 @@
 #pragma once
 #include "MObject.h"
 
-//교수님... 저 정말 모르겠어요...ㅠㅠㅠㅠㅠ
 
 template <typename T>
 class MSNode

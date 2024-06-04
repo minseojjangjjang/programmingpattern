@@ -4,23 +4,35 @@
 
 using namespace std;
 
-int main()
-{
-    int count = 0;
-    int thousand = 1010;
-    chrono::steady_clock::time_point prev_end = chrono::steady_clock::now();//현재시각 타임포인트 이전에 끝난 시간 = 현재 시간 지금
-    chrono::steady_clock::time_point end = chrono::steady_clock::now();//현재시각 타임포인트 끝난 시간 = 현재 시간 지금
+int main() {
+    // 1초 간격을 나타내는 chrono::duration 객체 생성
+    auto duration = chrono::seconds(1);
 
-    while (count < 10)//10보다 작을 때까지
-    {
-        prev_end = end; //이전에 끝난 건 = 지금 끝난 거
-        end = chrono::steady_clock::now(); //지금 끝난 거는 = 지금 현재 시간
-        chrono::steady_clock::duration diff = end - prev_end; //현재 시간 사이의 시간 = 끝난 거 - 이전에 끝난거        종료 - 시작 = 걸린 시간(차이)
-        auto duration_ns = chrono::duration_cast<chrono::milliseconds>(diff).count(); // 사이 시간 = 차이
+    // 현재 시간을 기준으로 시작 시간 설정
+    auto start_time = chrono::steady_clock::now();
 
-        count++;
-        cout << count << " dur: " << duration_ns << endl;
+    // 1부터 10까지 반복 루프
+    for (int i = 1; i <= 10; ++i) {
+        // 현재 시간 측정
+        auto current_time = chrono::steady_clock::now();
 
-        this_thread::sleep_for(chrono::milliseconds(1000));
+        // 시작 시간과 현재 시간의 차이 계산
+        auto elapsed_time = current_time - start_time;
+
+        // 1초 간격이 지났는지 확인
+        if (elapsed_time >= duration) {
+            // 숫자 출력
+            cout << i << " ";
+
+            // 시작 시간을 현재 시간으로 업데이트
+            start_time = current_time;
+        }
+
+        // 1밀리초 동안 휴식
+        this_thread::sleep_for(chrono::milliseconds(1));
     }
+
+    cout << endl; // 마지막에 줄 바꿈 추가
+
+    return 0;
 }

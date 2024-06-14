@@ -9,7 +9,7 @@ bool isJumping = false;
 const float gravity = -9.81f;  // 중력 가속도 (m/s^2)
 const float jumpForce = 5.0f;  // 점프 초기 속도 (m/s)
 float obstacleX = 1.0f;
-const float obstacleWidth = 0.125f; // 플레이어와 장애물의 가로 길이를 50px로 변환
+const float obstacleWidth = 0.075f; // 장애물의 가로 길이를 0.05f 줄임
 const float obstacleHeightLow = 0.25f;  // 낮은 높이 장애물 높이 (50px x 100px)
 const float obstacleHeightHigh = 0.75f; // 높은 높이 장애물 높이 (50px x 300px)
 const float obstacleSpeed = 1.0f;  // 장애물의 기본 이동 속도
@@ -50,10 +50,10 @@ int Player(float deltaTime)
     glColor3f(1.0f, 0.0f, 0.0f); // 빨간색
 
     // 블록의 위치를 반영하여 꼭지점 설정 (가로 길이 50px로 변환)
-    glVertex2f(blockX - 0.0625f, blockY - 0.0625f);
-    glVertex2f(blockX + 0.0625f, blockY - 0.0625f);
-    glVertex2f(blockX + 0.0625f, blockY + 0.0625f);
-    glVertex2f(blockX - 0.0625f, blockY + 0.0625f);
+    glVertex2f(blockX - 0.1625f, blockY - 0.1625f);
+    glVertex2f(blockX + 0.1625f, blockY - 0.1625f);
+    glVertex2f(blockX + 0.1625f, blockY + 0.1625f);
+    glVertex2f(blockX - 0.1625f, blockY + 0.1625f);
 
     glEnd();
 
@@ -131,10 +131,10 @@ void CheckCollision()
     float obstacleHeight = isLowObstacle ? obstacleHeightLow : obstacleHeightHigh;
 
     // 플레이어와 장애물의 충돌 체크
-    if (blockX + 0.0625f > obstacleX - obstacleWidth &&
-        blockX - 0.0625f < obstacleX + obstacleWidth &&
-        blockY + 0.0625f > groundY &&
-        blockY - 0.0625f < groundY + obstacleHeight)
+    if (blockX + 0.1625f > obstacleX - obstacleWidth &&
+        blockX - 0.1625f < obstacleX + obstacleWidth &&
+        blockY + 0.1625f > groundY &&
+        blockY - 0.1625f < groundY + obstacleHeight)
     {
         std::cout << "Collision detected with " << (isLowObstacle ? "low" : "high") << " obstacle!" << std::endl;
         glfwTerminate();

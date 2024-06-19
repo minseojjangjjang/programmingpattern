@@ -92,7 +92,7 @@ void Star::drawStar() const {
 
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex2f(x, y);
-
+	   
 	for (int i = 0; i <= 5; ++i) {
 		float xVertex = x + halfSize * cos(i * 2 * angle);
 		float yVertex = y + halfSize * sin(i * 2 * angle);

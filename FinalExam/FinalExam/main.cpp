@@ -14,16 +14,16 @@ const int MAX_OBSTACLES = 2;
 const int MAX_STARS = 5; // 별 수
 
 // 중력 가속도
-const float GRAVITY = -9.8f; // 중력 가속도
+const float GRAVITY = -9.8f; // 중력 가속도 
 
 // 플레이어 점프 속도
-const float MAX_JUMP_FORCE = 15.0f;
+const float JUMP_FORCE = 4.0f; // 고정된 점프 힘
+const float FALL_SPEED_MODIFIER = 0.5f; // 낙하 속도 조절
 
 // 플레이어 상태
 bool isJumping = false;
-float playerVelocityY = 0.0f;
-double spacebarPressedTime = 0.0;
 bool spacebarHeld = false;
+float playerVelocityY = 0.0f;
 
 // 전역 변수로 플레이어 선언
 Player player(0.0f, 0.0f, 0.1f, 0.1f, 1.0f, 0.0f, 0.0f);
@@ -43,40 +43,62 @@ void errorCallback(int error, const char* description) {
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && !isJumping) {
-		spacebarPressedTime = glfwGetTime();
-		spacebarHeld = true;
-	}
-	if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE && !isJumping) {
-		double spacebarReleasedTime = glfwGetTime();
-		double heldTime = spacebarReleasedTime - spacebarPressedTime;
-		float jumpForce = (heldTime * 15.0f < MAX_JUMP_FORCE) ? (heldTime * 15.0f) : MAX_JUMP_FORCE;  // 최대 점프력을 제한
-		playerVelocityY = jumpForce;
-		isJumping = true;
-		spacebarHeld = false;
-		player.rotationSpeed = -180.0f / (2 * jumpForce / -GRAVITY); // 점프 동안 180도 반대 방향으로 회전
+	if (key == GLFW_KEY_SPACE) {
+		if (action == GLFW_PRESS && !isJumping) {
+			playerVelocityY = JUMP_FORCE;
+			isJumping = true;
+			spacebarHeld = true;
+			player.rotationSpeed = -180.0f / (2 * JUMP_FORCE / -GRAVITY); // 점프 동안 180도 반대 방향으로 회전
+		}
+		if (action == GLFW_RELEASE) {
+			spacebarHeld = false;
+		}
 	}
 }
 
 void reshape(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+
 	float aspectRatio = (float)width / (float)height;
+	float left, right, bottom, top, near = -1.0f, far = 1.0f;
+
 	if (aspectRatio > 1.0f) {
 		// Wider than tall
-		glOrtho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+		left = -aspectRatio;
+		right = aspectRatio;
+		bottom = -1.0f;
+		top = 1.0f;
 	}
 	else {
 		// Taller than wide
-		glOrtho(-1.0f, 1.0f, -1.0f / aspectRatio, 1.0f / aspectRatio, -1.0f, 1.0f);
+		left = -1.0f;
+		right = 1.0f;
+		bottom = -1.0f / aspectRatio;
+		top = 1.0f / aspectRatio;
 	}
+
+	float orthoMatrix[16] = {
+		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+		0.0f, 0.0f, -2.0f / (far - near), 0.0f,
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0f
+	};
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(orthoMatrix);
+
 	glMatrixMode(GL_MODELVIEW);
 }
 
 void ApplyPhysics(Player& player, Floor& ground, float deltaTime) {
 	if (isJumping) {
-		playerVelocityY += GRAVITY * deltaTime; // 중력 가속도 적용
+		if (spacebarHeld) {
+			playerVelocityY += (GRAVITY * FALL_SPEED_MODIFIER) * deltaTime; // 느린 낙하 속도 적용
+		}
+		else {
+			playerVelocityY += GRAVITY * deltaTime; // 중력 가속도 적용 
+		}
+
 		player.y += playerVelocityY * deltaTime; // y 위치 업데이트
 		player.rotationAngle += player.rotationSpeed * deltaTime; // 회전 각도 업데이트
 
@@ -91,14 +113,15 @@ void ApplyPhysics(Player& player, Floor& ground, float deltaTime) {
 }
 
 void UpdateObstacles(EnemyBlock obstacles[], int obstacleCount, float deltaTime, float ground_y_opengl) {
+	float obstacleSpeed = 1.0f; // 장애물 속도
 	// 각 장애물을 왼쪽으로 이동시킵니다.
 	for (int i = 0; i < obstacleCount; ++i) {
-		obstacles[i].Move(-1.0f * deltaTime); // 장애물을 왼쪽으로 이동시킵니다.
+		obstacles[i].Move(-obstacleSpeed * deltaTime); // 장애물을 왼쪽으로 이동시킵니다.
 	}
 
 	// 화면 밖으로 나간 장애물을 확인하고 재활용합니다.
 	for (int i = 0; i < obstacleCount; ++i) {
-		if (obstacles[i].x + obstacles[i].width / 2 < -1.0f) {
+		if (obstacles[i].x + obstacles[i].width / 2 < -1.5f) {
 			// 장애물을 화면 오른쪽 끝으로 다시 이동시킵니다.
 			float heights[2] = { 0.2f, 0.6f }; // 낮고 높은 장애물의 높이
 			float newX = 1.0f + 0.25f * (rand() % 5); // 새로운 x 위치를 무작위로 설정
@@ -111,14 +134,15 @@ void UpdateObstacles(EnemyBlock obstacles[], int obstacleCount, float deltaTime,
 }
 
 void UpdateStars(Star stars[], int starCount, float deltaTime) {
-	// 각 별을 왼쪽으로 이동시킵니다. 장애물 속도의 1/3로 이동합니다.
+	float starSpeed = 1.0f / 3.0f; // 장애물 속도의 1/3 속도
+	// 각 별을 왼쪽으로 이동시킵니다.
 	for (int i = 0; i < starCount; ++i) {
-		stars[i].x += -1.0f * deltaTime / 3.0f; // 별을 왼쪽으로 이동시킵니다.
+		stars[i].Move(-starSpeed * deltaTime); // 별을 왼쪽으로 이동시킵니다.
 	}
 
 	// 화면 밖으로 나간 별을 확인하고 재활용합니다.
 	for (int i = 0; i < starCount; ++i) {
-		if (stars[i].x + stars[i].width / 2 < -1.0f) {
+		if (stars[i].x + stars[i].width / 2 < -1.5f) {
 			// 별을 화면 오른쪽 끝으로 다시 이동시킵니다.
 			float newX = 1.0f + 0.25f * (rand() % 5); // 새로운 x 위치를 무작위로 설정
 			float newY = 0.5f + 0.5f * (rand() % 100) / 100.0f; // 새로운 y 위치를 무작위로 설정
@@ -241,7 +265,7 @@ int main(void) {
 		// 버퍼를 교체하여 화면에 그립니다.
 		glfwSwapBuffers(window);
 	}
-	//return
+
 	glfwTerminate();
 	return 0;
 }

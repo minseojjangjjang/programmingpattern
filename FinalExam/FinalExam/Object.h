@@ -54,6 +54,9 @@ public:
 
 	void drawStar() const;
 	void Draw(float borderThickness = 0.0f) override;
+	void Move(float dx) {
+		x += dx;
+	}
 };
 
 int PhysicsAABB(Object A, Object B);
